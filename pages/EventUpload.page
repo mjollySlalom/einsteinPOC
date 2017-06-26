@@ -1,0 +1,17 @@
+<apex:page controller="EventPredictionController">
+
+  
+  
+  <apex:form >
+    <apex:outputLabel value="Contact Id: "></apex:outputLabel>
+    <apex:inputText value="{!entityId}"></apex:inputText>
+    <br/>
+    
+    <apex:outputLabel value="Item Id: "></apex:outputLabel>
+    <apex:inputText value="{!targetEntityId}"></apex:inputText>
+    <br/>
+    <apex:commandButton action="{!uploadEvent}" value="View Item"></apex:commandButton>
+    
+  </apex:form>
+ 
+</apex:page>

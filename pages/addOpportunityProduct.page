@@ -1,0 +1,31 @@
+<!--
+    Matt Jolly | Slalom | 6/23/17
+    Description - Content-less page. Uses the page parameters to call remote Apex. 
+            Adds a product to an opportunity.
+-->
+<apex:page controller="AddOpportunityProductController" sidebar="false" showHeader="false">
+    <script>
+        window.onload = function() {
+            console.log('calling');
+            Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.AddOpportunityProductController.attachSocket}',
+            '{!itemId}',
+            '{!oppId}',
+            function(result, event){
+                if (event.status) {
+                    //Return to previous page on successful callback
+                        //TODO: Replace JS back navigation
+                            // -Pass the return url in the page parameter
+                    window.history.back();
+                //exception
+                } else if (event.type === 'exception') {
+                    console.log('exception');
+                //Invalid response. No exception
+                } else {
+                    console.log('something else');
+                }
+            },
+            {escape: true});
+        }
+    </script>
+</apex:page>

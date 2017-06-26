@@ -1,0 +1,55 @@
+<apex:page controller="EventPredictionController">
+  
+  <apex:form >
+    
+    <!--<apex:inputText value="{!known}"></apex:inputText>-->
+    <apex:selectList value="{!known}" multiselect="false">
+        <apex:selectOptions value="{!productSelectOptions}"/>
+    </apex:selectList><p/>
+
+    <br/>
+    <apex:commandButton action="{!predictEvent}" value="Recommend"></apex:commandButton>
+   <!-- <apex:commandButton action="{!predictAll}" value="Show all predictions" style="margin-left:50px;"></apex:commandButton> -->
+  </apex:form>
+  
+  <br/><br/>
+  <apex:outputPanel id="prediction">
+    <!--<apex:outputLabel value="{!prediction}"></apex:outputLabel>-->
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Family</th>
+          <th>Description</th>
+          <th>Product Code</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <apex:repeat value="{!predictionList}" var="pred">
+          <tr>
+            <td>
+              <!--<apex:outputText value="{!pred.item.Name}"></apex:outputText>-->
+              <a href="/{!pred.item.id}">{!pred.item.Name}</a>
+            </td>
+            <td>
+              <apex:outputText value="{!pred.item.Family}"></apex:outputText>
+            </td>
+            <td>
+              <apex:outputText value="{!pred.item.Description}"></apex:outputText>
+            </td>
+            <td>
+              <apex:outputText value="{!pred.item.ProductCode}"></apex:outputText>
+            </td>
+            <td>
+              <a href="http://placeholder.com"><img src="http://via.placeholder.com/50x50"></img></a>
+            </td>
+          </tr>
+        </apex:repeat>
+      </tbody>
+    </table>
+    
+  
+  </apex:outputPanel>
+ 
+</apex:page>

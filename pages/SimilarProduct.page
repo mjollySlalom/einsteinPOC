@@ -1,0 +1,157 @@
+<apex:page controller="SimilarProductController" sidebar="false" showHeader="false">
+    <style>
+        #productSelectButton {
+            margin-left:25px;
+            margin-top:25px;
+        }    
+        .mainHeader {
+            text-align:center;
+        }
+        .justified {
+            margin-left:50px;
+            
+        }
+        #resultDiv table {
+            width:90%;
+            border-collapse:separate;
+            border-spacing:0 5px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    
+    
+    <script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous">
+    </script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"></link>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <div style="text-align:center;"><h1 class="mainHeader">Recommend Attach</h1></div>
+    
+    <br/>
+    <br/>
+   
+    <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="productSelectButton">
+            <span class="selection">Select Product</span><span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <apex:repeat value="{!productSelectOptions}" var="p">
+                <li onClick="handleSelection('{!p.prodId}', '{!p.name}')"><a href="#">{!p.name}</a></li>
+            </apex:repeat>
+        </ul>
+    </div>
+    
+    <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" id="productSelectButton">
+            <span class="selection">Max results</span><span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li onClick="changeMax(1);"><a href="#">1</a></li>
+            <li onClick="changeMax(5);"><a href="#">5</a></li>
+            <li onClick="changeMax(10);"><a href="#">10</a></li>
+            <li onClick="changeMax(20);"><a href="#">20</a></li>
+        </ul>
+    </div>
+    <br/><br/>
+    <div id="resultDiv"></div>
+
+    <script>
+        $j = jQuery.noConflict();
+
+        //Set the maximum number of results to return. 
+            //Default to 5
+        var max = 5;
+        var currProdId;
+        var currProdName;
+
+        //Updates the dropdown text
+        $j(".dropdown-menu li a").click(function(){
+            $j(this).parents(".btn-group").find('.selection').text($j(this).text());
+            $j(this).parents(".btn-group").find('.selection').val($j(this).text());
+        });
+
+        //Set the maximum number of results to return
+        function changeMax(newMax) {
+            //Set the max
+            max = newMax;
+            //Refresh the results
+            if(currProdId && currProdName) {
+                handleSelection(currProdId, currProdName);
+            }
+        }
+
+        /*
+            When a product is selected, call the remote action to find similar products,
+                construct the result table, and append it to the page.
+        */
+        function handleSelection(prodId, prodName) {
+            currProdId = prodId;
+            currProdName = prodName;
+            Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.SimilarProductController.predictEvent}',
+            prodId,
+            max,
+            function(result, event){
+                if (event.status) {
+                   //clear the results
+                   $j("#resultDiv").empty();
+                   //Set the selected product message
+                   $j("#resultDiv").append('<p class="justified">Products similar to: <strong>' + prodName + '</strong></p>');
+                   
+                   //Initialize the table and populate head
+                   var table = 
+                       ' <table class="table table-striped">'
+                           + '<thead>'
+                               + '<tr>'
+                                    + '<th>Name</th>'
+                                    + '<th>Family</th>'
+                                    + '<th>Description</th>'
+                                    + '<th>Product Code</th>'
+                                    + '<th>Score</th>'
+                                    + '<th></th>'
+                                +'</tr>'
+                            + '</thead>'
+                            + '<tbody>';
+                    
+                    //Iterate over each result returned and add a row to the table for each
+                    for(var i=0; i<result.length; i++) {
+                        //console.log(JSON.stringify(result[i]));
+                        table += 
+                            '<tr>'
+                                +'<td><a href="/' + result[i].item.Id + '"> ' + result[i].item.Name + ' </a></td>'
+                                +'<td>' + result[i].item.Family + '</td>'
+                                +'<td>' + result[i].item.Description + '</td>'
+                                +'<td>' + result[i].item.ProductCode + '</td>'
+                                +'<td>' + result[i].score + '</td>';
+                                
+                        //console.log('result[i].item.Product_Image__c: ' + result[i].item.Product_Image__c);
+                        
+                        table += result[i].item.Product_Image__c == undefined 
+                                ? '<td><a href="http://placeholder.com"><img src="http://via.placeholder.com/50x50"></img></a></td>'
+                                : '<td><a href="http://placeholder.com"><img style="height:50px; width:50px;" src="' + result[i].item.Product_Image__c + '"></img></a></td>';
+                                
+                                
+                        table += '</tr>';
+                    }    
+                    //finalize the table and append to the page
+                    table += '</tbody></table>';
+                    $j("#resultDiv").append(table);  
+                
+                //exception
+                } else if (event.type === 'exception') {
+                    console.log('exception');
+                //Invalid response. No exception
+                } else {
+                    console.log('something else');
+                }
+            },
+            {escape: true});
+        }
+     </script>
+</apex:page>

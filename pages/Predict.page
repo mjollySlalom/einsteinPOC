@@ -1,0 +1,29 @@
+<apex:page Controller="VisionController">
+  <apex:form >
+  <apex:pageBlock >
+      <apex:inputText value="{!imageUrl}"></apex:inputText>
+      <apex:commandButton rerender="predictionBlock" value="Identify" style="margin-left:50px;"></apex:commandButton>
+      
+      
+      <br/>
+     
+      <br/>
+      <apex:outputPanel id="predictionBlock" >
+        <apex:outputPanel rendered="{!imageUrl != ''}">
+          <apex:image url="{!imageUrl}" style="height:300px;"></apex:image>
+          <br/>
+          <apex:repeat value="{!callVisionUrl}" var="prediction">
+            <apex:outputText value="{!prediction.label}" />:<apex:outputText value="{!prediction.probability}" /><br/>
+          </apex:repeat>    
+        </apex:outputPanel>
+        
+      </apex:outputPanel>
+      
+  </apex:pageBlock>
+<!--  <apex:pageBlock > -->
+<!--      <apex:repeat value="{!callVisionContent}" var="prediction"> -->
+<!--          <apex:outputText value="{!prediction.label}" />:<apex:outputText value="{!prediction.probability}" /><br/> -->
+<!--    </apex:repeat> -->
+<!--  </apex:pageBlock> -->
+  </apex:form>
+</apex:page>
